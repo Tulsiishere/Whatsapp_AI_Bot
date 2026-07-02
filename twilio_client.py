@@ -20,7 +20,7 @@ def send_whatsapp_message(to: str, body: str) -> str:
     # Read credentials fresh each call — avoids module-load crash if .env missing
     account_sid = os.getenv("TWILIO_ACCOUNT_SID")
     auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_number = os.getenv("TWILIO_WHATSAPP_FROM")  # e.g. whatsapp:+14155238886
+    from_number = os.getenv("TWILIO_WHATSAPP_FROM")
 
     client = Client(account_sid, auth_token)
 
