@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kabir Oberoi — WhatsApp Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #0e0e0e;
+      color: #f0ede8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 2px;
+      width: 100%;
+      max-width: 520px;
+      padding: 48px 40px 40px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #f0ede8;
+      font-weight: normal;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: #c9a96e;
+      margin: 20px auto;
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: #111;
+      border: 1px solid #2e2e2e;
+      border-radius: 1px;
+      color: #f0ede8;
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 20px;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #c9a96e;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #444;
+    }
+
+    button {
+      width: 100%;
+      background: #c9a96e;
+      color: #0e0e0e;
+      border: none;
+      border-radius: 1px;
+      padding: 14px;
+      font-family: 'Georgia', serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    button:hover { background: #d4b87a; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .status {
+      margin-top: 20px;
+      padding: 12px 14px;
+      border-radius: 1px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .status.success {
+      background: #0f2016;
+      border: 1px solid #1e5c30;
+      color: #4caf78;
+      display: block;
+    }
+
+    .status.error {
+      background: #1e0f0f;
+      border: 1px solid #5c1e1e;
+      color: #cf6679;
+      display: block;
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: #555;
+      text-align: right;
+      margin-top: -16px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-name">Kabir Oberoi</div>
+      <div class="divider"></div>
+      <div class="brand-sub">WhatsApp Outreach Console</div>
+    </div>
+
+    <label for="phone">Recipient Phone Number</label>
+    <input
+      type="tel"
+      id="phone"
+      placeholder="+919876543210"
+      autocomplete="off"
+    />
+
+    <label for="message">Message</label>
+    <textarea
+      id="message"
+      placeholder="Type your message to the customer…"
+      maxlength="1600"
+      oninput="updateCount()"
+    ></textarea>
+    <div class="char-count"><span id="count">0</span> / 1600</div>
+
+    <button id="sendBtn" onclick="sendMessage()">Send Message</button>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    function updateCount() {
+      document.getElementById('count').textContent =
+        document.getElementById('message').value.length;
+    }
+
+    async function sendMessage() {
+      const to = document.getElementById('phone').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const btn = document.getElementById('sendBtn');
+      const status = document.getElementById('status');
+
+      status.className = 'status';
+      status.textContent = '';
+
+      if (!to || !message) {
+        status.className = 'status error';
+        status.textContent = 'Please fill in both fields.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        const res = await fetch('/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to, message }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          status.className = 'status success';
+          status.textContent = `✓ Message sent to ${data.to}`;
+          document.getElementById('message').value = '';
+          updateCount();
+        } else {
+          status.className = 'status error';
+          status.textContent = `Error: ${data.detail || 'Something went wrong.'}`;
+        }
+      } catch (err) {
+        status.className = 'status error';
+        status.textContent = 'Could not reach the server. Is it running?';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      }
+    }
+  </script>
+</body>
+</html>
