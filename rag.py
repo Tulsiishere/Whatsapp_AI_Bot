@@ -56,4 +56,4 @@ def retrieve(query: str) -> str:
         return ""
 
     context = "\n\n---\n\n".join(chunks)
-    return f"Relevant information about Kabir Oberoi:\n\n{context}"
+    return f"Relevant information about Kalpavriksha AI Solutions:\n\n{context}"
