@@ -1,21 +1,18 @@
 from collections import defaultdict, deque
 
-# Per-user sliding window of messages
-# Each entry: {"role": "user" | "model", "parts": [{"text": "..."}]}
-HISTORY_LIMIT = 10  # last 10 turns (5 user + 5 model)
+MAX_HISTORY_TURNS = 10  # keep last 10 exchanges (10 user + 10 model messages)
 
-_store: dict[str, deque] = defaultdict(lambda: deque(maxlen=HISTORY_LIMIT))
+_store: dict[str, deque] = defaultdict(lambda: deque(maxlen=MAX_HISTORY_TURNS * 2))
 
 
 def get_history(phone: str) -> list[dict]:
+    """Return this user's history in the shape google.generativeai's
+    start_chat(history=...) expects: [{"role": ..., "parts": [text]}, ...]"""
     return list(_store[phone])
 
 
 def add_message(phone: str, role: str, text: str):
-    _store[phone].append({
-        "role": role,
-        "parts": [{"text": text}]
-    })
+    _store[phone].append({"role": role, "parts": [text]})
 
 
 def clear_history(phone: str):
