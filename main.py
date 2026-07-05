@@ -146,7 +146,7 @@ def process_and_reply(user_number: str, user_message: str, has_media: bool = Fal
 Customer message: {user_message}"""
 
         # 5. Fetch existing history BEFORE modifying
-        history = conversation_history.get(user_number, [])
+        history = memory.get_history(user_number)
 
         # 6. Run Gemini
         chat = model.start_chat(history=history)
@@ -154,16 +154,8 @@ Customer message: {user_message}"""
         reply = response.text
 
         # 7. Persist CLEAN history (original message, not RAG-augmented)
-        updated_history = chat.history
-        if len(updated_history) >= 2:
-            clean_history = list(updated_history[:-2]) + [
-                {"role": "user", "parts": [user_message]},
-                {"role": "model", "parts": [reply]},
-            ]
-        else:
-            clean_history = list(updated_history)
-
-        conversation_history[user_number] = clean_history[-(MAX_HISTORY_TURNS * 2):]
+        memory.add_message(user_number, "user", user_message)
+        memory.add_message(user_number, "model", reply)
 
         # 8. Send reply
         send_whatsapp_message(user_number, reply)
