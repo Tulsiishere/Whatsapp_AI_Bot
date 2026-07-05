@@ -1,6 +1,6 @@
 # WhatsApp AI
 
-A WhatsApp shopping assistant for a Mumbai-based luxury fashion designer, built on FastAPI + Twilio WhatsApp + Gemini 2.5 Flash + ChromaDB (RAG over the product catalog). Built by Kalpavriksha as a capability showcase.
+A WhatsApp shopping assistant for a Mumbai-based luxury fashion designer, built on FastAPI + Twilio WhatsApp + Gemini 2.5 Flash + ChromaDB (RAG over the product catalog). Built by Kalpavriksha AI Solutions as a capability showcase.
 
 ---
 
