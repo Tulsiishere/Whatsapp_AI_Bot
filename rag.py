@@ -15,7 +15,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 CHROMA_PATH = "./chroma_db"
-COLLECTION_NAME = "kabir_oberoi_catalog"
+COLLECTION_NAME = "kalpavriksha_catalog"
 EMBED_MODEL = "gemini-embedding-001"
 TOP_K = 5
 
