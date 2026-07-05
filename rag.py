@@ -1,5 +1,4 @@
 """
-Day 3: Retrieval for RAG.
 Uses the same `google.genai` Client and embedding model as ingest.py so
 query embeddings and stored document embeddings live in the same space.
 (Previous version mixed this with the old `google.generativeai` SDK
