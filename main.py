@@ -13,6 +13,7 @@ import google.generativeai as genai
 
 from rag import retrieve
 from twilio_client import send_whatsapp_message
+import memory
 
 load_dotenv()
 
@@ -107,9 +108,6 @@ model = genai.GenerativeModel(
     system_instruction=SYSTEM_INSTRUCTION,
 )
 
-# ── In-memory conversation store ──────────────────────────────────────────────
-conversation_history: dict[str, list] = {}
-MAX_HISTORY_TURNS = 10
 
 # ── FastAPI app ───────────────────────────────────────────────────────────────
 app = FastAPI()
@@ -123,7 +121,7 @@ def process_and_reply(user_number: str, user_message: str, has_media: bool = Fal
     try:
         # 1. Handle reset command
         if user_message.strip().lower() == "reset":
-            conversation_history.pop(user_number, None)
+            memory.clear_history(user_number)
             send_whatsapp_message(user_number, "Fresh start! How can I help you today? ✨")
             return
 
@@ -134,10 +132,8 @@ def process_and_reply(user_number: str, user_message: str, has_media: bool = Fal
                      "you find something similar from the collection ✨")
             send_whatsapp_message(user_number, reply)
             # Still save to history so context is preserved
-            history = conversation_history.get(user_number, [])
-            history.append({"role": "user", "parts": ["[Customer sent an image]"]})
-            history.append({"role": "model", "parts": [reply]})
-            conversation_history[user_number] = history[-(MAX_HISTORY_TURNS * 2):]
+            memory.add_message(user_number, "user", "[Customer sent an image]")
+            memory.add_message(user_number, "model", reply)
             return
 
         # 3. Retrieve RAG context
