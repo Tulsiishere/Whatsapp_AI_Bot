@@ -22,7 +22,7 @@ load_dotenv()
 CATALOG_PATH = "data/catalog.txt"
 PRODUCTS_CSV_PATH = "data/products_export_1.csv"
 CHROMA_PATH = "./chroma_db"
-COLLECTION_NAME = "kabir_oberoi_catalog"
+COLLECTION_NAME = "kalpavriksha_catalog"
 EMBED_MODEL = "gemini-embedding-001"
 EMBED_BATCH_SIZE = 10  # smaller batches — free tier quota is 100 req/min and
                         # each item in a batch appears to count toward that
