@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CATALOG_PATH = "data/catalog.txt"
-PRODUCTS_CSV_PATH = "data/product_and_services .csv"
+SERVICES_CSV_PATH = "data/product_and_services .csv"
 CHROMA_PATH = "./chroma_db"
 COLLECTION_NAME = "kalpavriksha_catalog"
 EMBED_MODEL = "gemini-embedding-001"
@@ -77,81 +77,67 @@ def _strip_html(html: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def load_product_chunks(csv_path: str) -> list[str]:
-    """
-    Parse a Shopify product export CSV into one text chunk per active,
-    published product. Each product spans multiple CSV rows (one per
-    size/image variant) — only the first row per Handle carries the
-    Title/Body/metafields, so we group by Handle and use that row for
-    descriptive fields while pulling price range across all its rows.
-    """
-    if not os.path.exists(csv_path):
+def load_service_chunks(path: str) -> list[str]:
+    """Parse the Products & Services CSV into one chunk per row.
+    Sheet has a title banner + blank row before the real header, so skip 2 lines."""
+    if not os.path.exists(path):
         return []
 
-    with open(csv_path, encoding="utf-8") as f:
-        rows = list(csv.DictReader(f))
-
-    by_handle = defaultdict(list)
-    for r in rows:
-        if r.get("Handle"):
-            by_handle[r["Handle"]].append(r)
+    with open(path, encoding="utf-8-sig") as f:
+        lines = f.readlines()[2:]
 
     chunks = []
-    for handle, group in by_handle.items():
-        head = next((r for r in group if r.get("Title")), None)
-        if head is None:
+    for row in csv.DictReader(lines):
+        name = (row.get("Product / Service Name") or "").strip()
+        if not name:
             continue
-        if head.get("Status", "").lower() != "active" or head.get("Published", "").lower() != "true":
-            continue  # skip drafts/unpublished — don't quote prices on items not for sale
 
-        prices = [float(r["Variant Price"]) for r in group if r.get("Variant Price")]
-        if not prices:
-            continue
-        price_text = (
-            f"₹{min(prices):,.0f}"
-            if min(prices) == max(prices)
-            else f"₹{min(prices):,.0f}-₹{max(prices):,.0f}"
-        )
+        status = (row.get("Status") or "").strip()
+        category = (row.get("Category") or "").strip()
+        market_name = (row.get("Market Name") or "").strip()
+        description = (row.get("Description") or "").strip()
+        features = (row.get("Key Features") or "").strip()
+        audience = (row.get("Target Audience") or "").strip()
+        min_price = (row.get("Min Price (₹)") or "").strip()
+        max_price = (row.get("Max Price (₹)") or "").strip()
 
-        sizes = ", ".join(s.strip() for s in head.get("Size (product.metafields.shopify.size)", "").split(";") if s.strip())
-        color = ", ".join(c.strip() for c in head.get("Color (product.metafields.shopify.color-pattern)", "").split(";") if c.strip())
-        fabric = head.get("Fabric (product.metafields.shopify.fabric)", "").strip()
-        category = head.get("Type", "").strip() or head.get("Product Category", "").strip()
-        gender = head.get("Target gender (product.metafields.shopify.target-gender)", "").strip()
+        if min_price.lower().startswith("contact"):
+            price_text = "Contact us for pricing"
+        elif min_price == max_price:
+            price_text = min_price
+        else:
+            price_text = f"{min_price} – {max_price}"
 
-        desc = _strip_html(head.get("Body (HTML)", ""))
-        if len(desc) > 900:
-            desc = desc[:900].rsplit(".", 1)[0] + "."
-
-        parts = [f"PRODUCT: {head['Title']}", f"Price: {price_text}"]
+        parts = [f"SERVICE: {name}", f"Status: {status}"]
         if category:
-            parts.append(f"Category: {category}")
-        if fabric:
-            parts.append(f"Fabric: {fabric}")
-        if color:
-            parts.append(f"Color: {color}")
-        if sizes:
-            parts.append(f"Available sizes: {sizes}")
-        if gender:
-            parts.append(f"For: {gender}")
-        if desc:
-            parts.append(f"Description: {desc}")
+            parts.append(f"Category: {category}" + (f" ({market_name})" if market_name else ""))
+        if description:
+            parts.append(f"Description: {description}")
+        if features:
+            parts.append(f"Key features: {features}")
+        if audience:
+            parts.append(f"Best for: {audience}")
+        parts.append(f"Price: {price_text}")
+
+        if status.lower() == "coming soon":
+            parts.append("Note: not yet launched — customers can join the waitlist.")
+        elif status.lower() == "live demo":
+            parts.append("Note: this is a free live demo, not a paid deliverable.")
 
         chunks.append("\n".join(parts))
 
     return chunks
 
-
 def main():
-    catalog_chunks = load_catalog_chunks(CATALOG_PATH)
-    print(f"Loaded {len(catalog_chunks)} chunks from {CATALOG_PATH}")
+    service_chunks = load_service_chunks(SERVICES_CSV_PATH)
+    print(f"Loaded {len(service_chunks)} service_chunks from {SERVICES_CSV_PATH}")
 
     product_chunks = load_product_chunks(PRODUCTS_CSV_PATH)
     print(f"Loaded {len(product_chunks)} product chunks from {PRODUCTS_CSV_PATH}")
 
-    all_chunks = catalog_chunks + product_chunks
+    all_chunks = catalog_chunks + service_chunks
     ids = [f"catalog-{i}" for i in range(len(catalog_chunks))] + [
-        f"product-{i}" for i in range(len(product_chunks))
+        f"service-{i}" for i in range(len(service_chunks))
     ]
 
     db = chromadb.PersistentClient(path=CHROMA_PATH)
