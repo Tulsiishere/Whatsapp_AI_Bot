@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CATALOG_PATH = "data/catalog.txt"
-PRODUCTS_CSV_PATH = "data/products_export_1.csv"
+PRODUCTS_CSV_PATH = "data/product_and_services .csv"
 CHROMA_PATH = "./chroma_db"
 COLLECTION_NAME = "kalpavriksha_catalog"
 EMBED_MODEL = "gemini-embedding-001"
