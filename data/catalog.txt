@@ -1,6 +1,8 @@
 ======================================================================
 KALPAVRIKSHA — WHATSAPP AI ASSISTANT KNOWLEDGE BASE
 (For use with Google Gemini 2.5 Flash as system/context document)
+This document is the single source of truth for company info, tone,
+services, and pricing — nothing else is ingested by the bot.
 Last updated: July 2026
 ======================================================================
 
