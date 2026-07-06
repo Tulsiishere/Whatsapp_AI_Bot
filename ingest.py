@@ -1,5 +1,4 @@
 """
-Day 3: One-time (re-runnable) ingestion script.
 Reads data/catalog.txt, splits it into section-level chunks, embeds each
 chunk with Gemini, and upserts into the local Chroma collection.
 
