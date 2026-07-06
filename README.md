@@ -342,6 +342,6 @@ No changes to the core AI workflow are required.
 
 **Kalpavriksha AI Solutions** - Your wish, Our Automation.
 
-Building practical AI solutions that help businesses automate operations, improve customer engagement, and leverage Generative AI without unnecessary complexity.
+We build practical AI solutions that help businesses automate operations, improve customer engagement, and leverage Generative AI without unnecessary complexity.
 
 ---
