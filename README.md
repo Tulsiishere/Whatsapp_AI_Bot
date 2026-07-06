@@ -340,7 +340,7 @@ No changes to the core AI workflow are required.
 
 ## Built By
 
-**Kalpavriksha AI Solutions**
+**Kalpavriksha AI Solutions** - Your wish, Our Automation.
 
 Building practical AI solutions that help businesses automate operations, improve customer engagement, and leverage Generative AI without unnecessary complexity.
 
